@@ -5,12 +5,12 @@ dotenv.config();
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import helmet from 'helmet';
-import connectDb from '../config/connectDb.js';
-import userRouter from '../routes/user.route.js';
-import categoryRouter from '../routes/category.route.js';
-import productRouter from '../routes/product.route.js';
-import cartRouter from '../routes/cart.route.js';
-import wishListRouter from '../routes/wishList.route.js';
+import connectDb from './config/connectDb.js';
+import userRouter from './routes/user.route.js';
+import categoryRouter from './routes/category.route.js';
+import productRouter from './routes/product.route.js';
+import cartRouter from './routes/cart.route.js';
+import wishListRouter from './routes/wishList.route.js';
 
 const app = express();
 app.use(cors());
@@ -37,8 +37,8 @@ app.use('/api/wishlist', wishListRouter);
 
 
 connectDb().then(() => {
-    // app.listen(process.env.PORT, () => {
-    //     console.log(`Server is running on port ${process.env.PORT}`);
-    // });
+    app.listen(process.env.PORT, () => {
+        console.log(`Server is running on port ${process.env.PORT}`);
+    });
     console.log(`Server is running on port ${process.env.PORT}`);
 })
