@@ -15,6 +15,6 @@ userRouter.post("/forgot-password", forgotPasswordController)
 userRouter.post("/verify-forgot-password", verifyForgotPasswordController)
 userRouter.post("/reset-password", resetPasswordController)
 userRouter.post("/refresh-token", refreshTokenController)
-userRouter.get("/user-details", auth, getLoginUserDetailsController)
+userRouter.get("/user-details/:userId", auth, getLoginUserDetailsController)
 
 export default userRouter;

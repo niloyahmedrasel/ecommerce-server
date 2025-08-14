@@ -396,14 +396,14 @@ export async function updateUserDetailsController(request, response) {
 
         // ********** Send Email for varification **********
 
-        if (email !== userExist.email) {
-            const verifyEmail = await sendEmailFunc(
-                email, // to
-                "Verify Email from SHINE IIT", // subject
-                "", // text
-                verifyEmailTemplate(user.name, verifyCode) // html
-              );
-        }
+        // if (email !== userExist.email) {
+        //     const verifyEmail = await sendEmailFunc(
+        //         email, // to
+        //         "Verify Email from SHINE IIT", // subject
+        //         "", // text
+        //         verifyEmailTemplate(user.name, verifyCode) // html
+        //       );
+        // }
 
         return response.status(200).json({
             message: "User updated successfully",
@@ -653,9 +653,9 @@ export async function refreshTokenController(request, response) {
 export async function getLoginUserDetailsController(request, response) {
     try {
 
-        const userId = request.userId;
+        const userId = request.params.userId;
 
-        const user = await UserModel.findById(userId).select('-password -refresh_token');
+        const user = await UserModel.findById(userId)
 
         return response.status(200).json({
             message: "User details fetched successfully",
