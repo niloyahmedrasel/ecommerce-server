@@ -7,10 +7,10 @@ import fs from "fs";
 // ********** Product Image Upload **********
 
 cloudinary.config({
-  // cloud_name: process.env.cloudinary_Config_Cloud_Name,
-  // api_key: process.env.cloudinary_Config_Api_Key,
-  // api_secret: process.env.cloudinary_Config_Api_Secret,
-  // secure: true,
+  cloud_name: process.env.cloudinary_Config_Cloud_Name,
+  api_key: process.env.cloudinary_Config_Api_Key,
+  api_secret: process.env.cloudinary_Config_Api_Secret,
+  secure: true,
 })
 
 var imagesArray = [];

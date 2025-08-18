@@ -6,94 +6,59 @@ import fs from 'fs';
 // ********** Category Image Upload **********
 
 cloudinary.config({
-    // cloud_name: process.env.cloudinary_Config_Cloud_Name,
-    // api_key: process.env.cloudinary_Config_Api_Key,
-    // api_secret: process.env.cloudinary_Config_Api_Secret,
-    // secure: true,
+    cloud_name: process.env.cloudinary_Config_Cloud_Name,
+    api_key: process.env.cloudinary_Config_Api_Key,
+    api_secret: process.env.cloudinary_Config_Api_Secret,
+    secure: true,
 })
 
 var imagesArray = [];
 
-export async function categoryImgController(request, response) {
-    try {
-        imagesArray = [];
+export async function createCategoryController(req, res) {
+  try {
+    const imagesArray = [];
 
-        const image = request.files;
-      
-        const options = {
-            use_filename: true,
-            unique_filename: false,
-            overwrite: true,
-        };
+    const files = req.files; 
 
-        for (let i = 0; i < image?.length; i++) {
+  
+    for (let i = 0; i < files?.length; i++) {
+      const result = await cloudinary.uploader.upload(files[i].path, {
+        use_filename: true,
+        unique_filename: false,
+        overwrite: true,
+      });
 
-            const img = await cloudinary.uploader.upload(
-                image[i].path,
-                options,
-                function(error, result) {
-                    imagesArray.push(result.secure_url);
-                    fs.unlinkSync(`uploads/${image[i].filename}`);
-                }
-            );
-            
-        }
+      imagesArray.push(result.secure_url);
 
-        return response.status(200).json({
-            message: 'Images Uploaded Successfully',
-            images: imagesArray,
-            error: false,
-            success: true,
-        })
-        
-    } catch (error) {
-        return response.status(500).json({
-            message: error.message || error,
-            error: true,
-            success: false,
-        });
+      if (fs.existsSync(files[i].path)) {
+        fs.unlinkSync(files[i].path);
+      }
     }
+
+    const category = new CategoryModel({
+      name: req.body.name,
+      images: imagesArray,
+      parentId: req.body.parentId,
+      parentCatName: req.body.parentCatName,
+    });
+
+    await category.save();
+
+    return res.status(200).json({
+      message: 'Category Created Successfully',
+      category,
+      error: false,
+      success: true,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message || error,
+      error: true,
+      success: false,
+    });
+  }
 }
 
-// ********** Create Category **********
-
-export async function createCategoryController(request, response) {
-    try {
-
-        let category = new CategoryModel({
-            name: request.body.name,
-            images: imagesArray,
-            parentId: request.body.parentId,
-            parentCatName: request.body.parentCatName,
-        });
-
-        if (!category) {
-            return response.status(400).json({
-                message: 'Category Not Created',
-                error: true,
-                success: false,
-            });
-        }
-
-        category = await category.save();
-
-        imagesArray = [];
-
-        return response.status(200).json({
-            message: 'Category Created Successfully',
-            category: category,
-            error: false,
-            success: true,
-        });
-        
-    } catch (error) {
-        return response.status(500).json({
-            message: error.message || error,
-            error: true,
-            success: false,
-        });
-    }
-}
 
 
 // ********** Get All Categories **********
@@ -103,6 +68,8 @@ export async function getAllCategoriesController(request, response) {
 
         const categories = await CategoryModel.find();
         const categoryMap = {};
+
+        console.log(categories);
 
         if (!categories) {
             return response.status(400).json({
@@ -128,6 +95,7 @@ export async function getAllCategoriesController(request, response) {
                 rootCategories.push(categoryMap[category._id]);
             }
         });
+
 
         return response.status(200).json({
             message: 'Categories Found Successfully',
@@ -333,16 +301,19 @@ export async function deleteCategoryController(request, response) {
 
 export async function updateCategoryController(request, response) {
     
+    console.log(request.body);
     const category = await CategoryModel.findByIdAndUpdate(
         request.params.id,
         {
             name: request.body.name,
-            images: imagesArray.length > 0 ? imagesArray[0] : request.body.images,
+            images: request.body.images,
             parentId: request.body.parentId,
             parentCatName: request.body.parentCatName,
         },
         { new: true }
     );
+
+    console.log(category);
 
     if (!category) {
         return response.status(400).json({
