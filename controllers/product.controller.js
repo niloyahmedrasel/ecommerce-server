@@ -13,7 +13,6 @@ cloudinary.config({
   secure: true,
 })
 
-var imagesArray = [];
 
 export async function productImgController(request, response) {
     try {
@@ -60,6 +59,27 @@ export async function productImgController(request, response) {
 
 export async function createProductController(request, response) {
   try {
+    const imagesArray = [];
+    const image = request.files;
+      
+    const options = {
+        use_filename: true,
+        unique_filename: false,
+        overwrite: true,
+    };
+
+    for (let i = 0; i < image?.length; i++) {
+
+    const img = await cloudinary.uploader.upload(
+          image[i].path,
+          options,
+          function(error, result) {
+                imagesArray.push(result.secure_url);
+              fs.unlinkSync(`uploads/${image[i].filename}`);
+          }
+      );
+      
+    }
 
     let product = new ProductModel({
       name: request.body.name,

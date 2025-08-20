@@ -5,7 +5,7 @@ import { createProductController, deleteProductController, filterByPriceControll
 
 const productRouter = Router();
 productRouter.post('/upload-images', auth, upload.array('images'), productImgController)
-productRouter.post('/create', auth, createProductController)
+productRouter.post('/create', auth,upload.array('images'), createProductController)
 productRouter.get('/all-products',  getAllProductsController)
 productRouter.get('/category-products/:id', getAllProductsByCatController)
 productRouter.get('/category-products', getAllProductsByNameController)
