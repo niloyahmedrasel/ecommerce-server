@@ -4,7 +4,7 @@ import upload from "../middlewares/multer.js";
 import { createProductController, deleteProductController, filterByPriceController, getAllProductsByCatController, getAllProductsByNameController, getAllProductsBySubCatController, getAllProductsBySubCatNameController, getAllProductsController, getAllProductsCountController, getFeaturedProductController, getSingleProductController, productImagesRemoveController, productImgController, updateProductController } from "../controllers/product.controller.js";
 
 const productRouter = Router();
-productRouter.post('/upload-images', auth, upload.array('images'), productImgController)
+// productRouter.post('/upload-images', auth, upload.array('images'), productImgController)
 productRouter.post('/create', auth,upload.array('images'), createProductController)
 productRouter.get('/all-products',  getAllProductsController)
 productRouter.get('/category-products/:id', getAllProductsByCatController)
@@ -17,8 +17,6 @@ productRouter.get('/featured-products', getFeaturedProductController)
 productRouter.delete('/:id', deleteProductController)
 productRouter.get('/:id', getSingleProductController)
 productRouter.delete("/delete-images", auth, productImagesRemoveController)
-productRouter.delete("/update-product/:id", auth, updateProductController)
-
-
+productRouter.put("/update-product/:id", auth,upload.array('images'), updateProductController)
 
 export default productRouter;

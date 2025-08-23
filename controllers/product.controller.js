@@ -59,7 +59,7 @@ export async function productImgController(request, response) {
 
 export async function createProductController(request, response) {
   try {
-    const imagesArray = [];
+    let imagesArray = [];
     const image = request.files;
       
     const options = {
@@ -415,7 +415,7 @@ export async function filterByPriceController(request, response) {
       if (request.query.minPrice &&  product.price < parseInt(+request.query.minPrice)) {
         return false;
       }
-      if (request.query.maxPrice && product.price > parseInt(+request.query.maxPrice)) {
+      if (request.query.minPrice && product.price > parseInt(+request.query.maxPrice)) {
         return false;
       }
       return true;
@@ -626,28 +626,54 @@ export async function productImagesRemoveController(request, response) {
 export async function updateProductController(request, response) {
   try {
 
+    console.log(request.body);
+    let imagesArray = [];
+    const image = request.files;
+
+    const options = {
+      use_filename: true,
+      unique_filename: false,
+      overwrite: true,
+    };
+
+    // upload new images if provided
+    if (image && image.length > 0) {
+      for (let i = 0; i < image.length; i++) {
+        const result = await cloudinary.uploader.upload(image[i].path, options);
+        imagesArray.push(result.secure_url);
+        fs.unlinkSync(`uploads/${image[i].filename}`);
+      }
+    }
+
+    // build update object
+    const updateData = {
+      name: request.body.name,
+      description: request.body.description,
+      brand: request.body.brand,
+      price: request.body.price,
+      oldPrice: request.body.oldPrice,
+      catName: request.body.catName,
+      catId: request.body.catId,
+      subCatName: request.body.subCatName,
+      subCatId: request.body.subCatId,
+      countInStock: request.body.countInStock,
+      category: request.body.category,
+      isFeatured: request.body.isFeatured,
+      discount: request.body.discount,
+      product_Storage: request.body.product_Storage,
+      product_CPU: request.body.product_CPU,
+      product_RAM: request.body.product_RAM,
+    };
+
+    // only update images if new ones were uploaded
+    if (imagesArray.length > 0) {
+      updateData.images = imagesArray;
+    }
+
     const product = await ProductModel.findByIdAndUpdate(
       request.params.id,
-        {
-          name: request.body.name,
-          description: request.body.description,
-          images: request.body.images,
-          brand: request.body.brand,
-          price: request.body.price,
-          oldPrice: request.body.oldPrice,
-          catName: request.body.catName,
-          catId: request.body.catId,
-          subCatName: request.body.subCatName,
-          subCatId: request.body.subCatId,
-          countInStock: request.body.countInStock,
-          category: request.body.category,
-          isFeatured: request.body.isFeatured,
-          discount: request.body.discount,
-          product_Storage: request.body.product_Storage,
-          product_CPU: request.body.product_CPU,
-          product_RAM: request.body.product_RAM,
-        },
-        {new: true}
+      updateData,
+      { new: true } // return updated doc
     );
 
     if (!product) {
@@ -658,20 +684,20 @@ export async function updateProductController(request, response) {
       });
     }
 
-    imagesArray = [];
-
     return response.status(200).json({
       message: 'Product Updated Successfully',
-      product: product,
+      product,
       error: false,
       success: true,
-    })
-    
+    });
+
   } catch (error) {
     return response.status(500).json({
       message: error.message || error,
       error: true,
       success: false,
-  });
+    });
   }
 }
+
+
