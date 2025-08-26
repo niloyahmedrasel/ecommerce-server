@@ -192,6 +192,7 @@ export async function loginUserController(request, response) {
             error: false,
             success: true,
             data: {
+                id: user._id,
                 accessToken,
                 refreshToken,
             }

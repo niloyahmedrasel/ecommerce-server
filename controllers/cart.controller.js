@@ -66,7 +66,7 @@ export const addToCartItemController = async (request, response) => {
 export const getCartItemController = async (request, response) => {
     try {
 
-        const userId = request.userId;
+        const userId = request.query.userId;
 
         if(!userId) {
             return response.status(400).send({
@@ -102,11 +102,11 @@ export const updateCartItemController = async (request, response) => {
     try {
 
         const userId = request.userId;
-        const {_id, qty} = request.body;
+        const {cartId, qty} = request.body;
 
-        if (!_id || !qty) {
+        if (!cartId || !qty) {
             return response.status(400).send({
-                message: "Product Id and Quantity is required",
+                message: "cart Id and Quantity is required",
                 error: true,
                 success: false,
             })
@@ -114,7 +114,7 @@ export const updateCartItemController = async (request, response) => {
 
         const updateCartItem = await CartProductModel.updateOne(
             {
-                _id: _id,
+                _id: cartId,
                 userId: userId,
             },
             {
