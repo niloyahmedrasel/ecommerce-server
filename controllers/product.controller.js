@@ -167,7 +167,7 @@ export async function getAllProductsController(request, response) {
 
     return response.status(200).json({
       message: 'Products Found Successfully',
-      products: products,
+      data: products,
       totalPages: totalPages,
       page: page,
       error: false,
@@ -219,7 +219,7 @@ export async function getAllProductsByCatController(request, response) {
   
       return response.status(200).json({
         message: 'Products Found Successfully',
-        products: products,
+        data: products,
         totalPages: totalPages,
         page: page,
         error: false,
@@ -269,7 +269,7 @@ export async function getAllProductsByNameController(request, response) {
     
         return response.status(200).json({
           message: 'Products Found Successfully',
-          products: products,
+          data: products,
           totalPages: totalPages,
           page: page,
           error: false,
@@ -322,7 +322,7 @@ export async function getAllProductsBySubCatController(request, response) {
 
     return response.status(200).json({
       message: 'Products Found Successfully',
-      products: products,
+      data: products,
       totalPages: totalPages,
       page: page,
       error: false,
@@ -372,7 +372,7 @@ export async function getAllProductsBySubCatNameController(request, response) {
   
       return response.status(200).json({
         message: 'Products Found Successfully',
-        products: products,
+        data: products,
         totalPages: totalPages,
         page: page,
         error: false,
@@ -423,7 +423,7 @@ export async function filterByPriceController(request, response) {
 
     return response.status(200).json({
       message: 'Products Found Successfully',
-      products: filteredProducts,
+      data: filteredProducts,
       totalPages: 0,
       page: 0,
       error: false,
@@ -579,7 +579,7 @@ export async function getSingleProductController(request, response) {
 
     return response.status(200).json({
       message: 'Product Found Successfully',
-      product: product,
+      data: product,
       error: false,
       success: true,
     })
