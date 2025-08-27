@@ -8,13 +8,14 @@ import generateAccessToken from "../utils/generateAccessToken.js";
 import generateRefreshToken from "../utils/generateRefreshToken.js";
 import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
+import AddressModel from "../models/address.model.js";
 
 // ********** Register User **********
 export async function registerUserController(request, response) {
     try {
         let user;
 
-        const { name, email, password } = request.body;
+        const { name, email, password,role } = request.body;
         if (!name || !email || !password) {
             return response.status(400).json({
                 message: "All fields are required",
@@ -42,6 +43,7 @@ export async function registerUserController(request, response) {
             name: name,
             email: email,
             password: hashPassword,
+            role: role || "User",
             otp: verifyCode,
             otpExpires: Date.now() + 600000,
         })
@@ -257,7 +259,7 @@ export async function avatarUserController(request, response) {
     try {
         imagesArray = [];
 
-        const userId = request.userId;
+        const userId = request.params.userId;
         const image = request.files;
 
         const user = await UserModel.findById( {_id: userId} );
@@ -356,7 +358,7 @@ export async function avatarUserRemoveController(request, response) {
 
 export async function updateUserDetailsController(request, response) {
     try {
-        const userId = request.userId;
+        const userId = request.params.id;
         const {name, email, mobile, password} = request.body;
 
         const userExist = await UserModel.findById( {_id: userId} );
@@ -379,21 +381,41 @@ export async function updateUserDetailsController(request, response) {
             hashPassword = userExist.password;
         }
 
-        const updateUser = await UserModel.findByIdAndUpdate(
-            userId,
-            {
-                name: name || userExist.name,
-                email: email || userExist.email,
-                verify_email: email !== userExist.email ? false : true,
-                mobile: mobile || userExist.mobile,
-                password: hashPassword,
-                otp: verifyCode !== "" ? verifyCode : null,
-                otpExpires: verifyCode !== "" ? Date.now() + 600000 : "",
-            },
-            {
-                new: true,
-            }
-        )
+        const updateFields = {
+            name: name || userExist.name,
+            email: email || userExist.email,
+            verify_email: email !== userExist.email ? false : true,
+            mobile: mobile || userExist.mobile,
+            password: hashPassword,
+            otp: verifyCode !== "" ? verifyCode : null,
+            otpExpires: verifyCode !== "" ? Date.now() + 600000 : "",
+        };
+
+        const existingUserAddress = await AddressModel.findOne({ userId: userId });
+
+        console.log(" ---------------------       ", existingUserAddress);
+
+        if(!existingUserAddress) {
+
+          const createUserAddress = await AddressModel.create({
+            userId: userId,
+            ...request.body
+          })
+
+          console.log(createUserAddress);
+
+            userExist.address_details = createUserAddress._id;
+            await userExist.save();
+        }else{
+            console.log("Address updated");
+            await AddressModel.findOneAndUpdate(
+            { userId: userId },
+            { ...request.body },
+            { new: true }
+          );
+        }
+
+        const updateUser = await UserModel.findByIdAndUpdate(userId, updateFields, { new: true });
 
         // ********** Send Email for varification **********
 
@@ -656,7 +678,7 @@ export async function getLoginUserDetailsController(request, response) {
 
         const userId = request.params.userId;
 
-        const user = await UserModel.findById(userId)
+        const user = await UserModel.findById(userId).populate("address_details");
 
         return response.status(200).json({
             message: "User details fetched successfully",
